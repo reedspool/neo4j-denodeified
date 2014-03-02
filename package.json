@@ -1,0 +1,20 @@
+{
+  "name": "node-example",
+  "version": "0.0.1",
+  "dependencies": {
+    "redis-url": "0.1.0",
+    "express": "3.1.x",
+    "underscore": "1.5.1",
+    "superagent": "0.15.4",
+    "expect.js": "0.2.0",
+    "jade": "*",
+    "stylus": "*",
+    "nib": "*",
+    "twitter-bootstrap-node": "~0.1.2",
+    "q": "~0.9.6"
+  },
+  "engines": {
+    "node": "0.10.x",
+    "npm": "1.2.x"
+  }
+}
