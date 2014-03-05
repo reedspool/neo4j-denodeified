@@ -48,20 +48,55 @@ function proxyConnect(url) {
 	var db = new this.GraphDatabase(url);
 
 	proxyCreateNode(db);
+	proxyGetIndexedNode(db);
 
 	return db;
 }
 
+// Refactor me and my bro downstairs!
 function proxyCreateNode(db) {
 	db.__proxied__createNode = db.createNode;
-	
+
 	db.createNode = function () {
 		var node = db.__proxied__createNode.apply(db, arguments);
 
-		node.save = Q.nbind(node.save, node);
-
-		return node;
+		return proxyNode(node);
 	}
+}
+
+function proxyGetIndexedNode(db) {
+	db.__proxied__getIndexedNode = db.getIndexedNode;
+
+	db.getIndexedNode = function (property, value) {
+		var index = 'node_auto_index';
+		var deferred = Q.defer();
+		var callback = deferred.makeNodeResolver();
+		
+		db.__proxied__getIndexedNode(index, property, value, callback);
+
+		return deferred.promise
+			.then(proxyNode);
+	}
+}
+
+
+function proxyNode(node) {
+	if ( ! node) return node;
+
+	var callback_methods = [
+		'save', 'delete', 'index', 'unindex', 
+		'createRelationshipTo', 'createRelationshipFrom',
+		'getRelationships', 'outgoing',
+		'incoming', 'all', 'getRelationshipNodes',
+		'path'
+	];
+
+
+	_.each(callback_methods, function (method) {
+		node[method] = Q.nbind(node[method], node);
+	});
+
+	return node;
 }
 
 module.exports = proxyNeo4j();
